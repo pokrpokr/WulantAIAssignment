@@ -18,6 +18,7 @@
     - Footer and some tags are not follow the order of PDF reading order(due to the sort() method logic, can be refactored)
 2. Assignment2
     - When using the read_pdf method of camelot, if using lattice as value of the flavor attribute, the table will not be found. However using the stream as value of the flavor attribute, it will read text blocks as table columns.
+    - Using camelot to read PDF file page is different with using PyMuPDF.For the requirement that should read the table of page 69 in PDF file,but what I realised it's actually page 77 for the camelot reading result. 
 3. Assignment3
     - TODO
 ## Assignment1
