@@ -17,7 +17,7 @@ def read_pdf(file_path, page_start, page_end):
         p_start, p_end = 0, len(doc) 
     elif page_start > 0 and page_start < len(doc) and page_start == page_end:
         p_start, p_end = page_start-1, page_end
-    elif page_start > 0 and page_start < len(doc) and page_end > page_start:
+    elif page_start > 0 and page_start < len(doc) and page_end > page_start and page_end < len(doc):
         p_start, p_end = page_start-1, page_end
     else:
         raise Exception("Can not find pages in PDF")
@@ -61,14 +61,13 @@ def read_pdf(file_path, page_start, page_end):
         text_blocks.sort(key=lambda x: (x["bbox"][0], x["bbox"][1]))
         
         for tb in text_blocks:
-            print("belongs to one block")
             lines = []
             for line in tb["lines"]:
-                print("belongs to one line")
                 span_text = [sp["text"] for sp in line["spans"]]
                 lines.append(reduce(lambda x, y: x+y, span_text))
             paragraphs.append(reduce(lambda x, y: x+"\n"+y, lines))
-        paragraph_blocks[page_index] = paragraphs
+        paragraph_blocks[page_index+1] = paragraphs
+    doc.close()
     return paragraph_blocks
         
 def export_to_excel(data: dict, excel_name):
@@ -155,14 +154,21 @@ def ocr_text_blocks(image, text_blocks):
 @click.option("--pg_end", "-pge", type=int, default=0, prompt="PDF end page")
 def main(src_pdf, expt_name, ver, pg_start, pg_end):
     if ver == 1:
+        print("----- Processing PDF -----")
         result = read_pdf(os.path.join(os.getcwd()+"/test_pdfs/", src_pdf), page_start=pg_start, page_end=pg_end)
         export_to_excel(result, os.path.join(os.getcwd()+"/export_excels/", expt_name))
+        print(f"----- File location: {os.path.join(os.getcwd()+'/export_excels/', expt_name)} -----")
+        print("----- Export Finished -----")
     elif ver == 2:
+        print("----- Processing PDF with opencv -----")
         for page_image in pdf_to_image(os.path.join(os.getcwd()+"/test_pdfs/", src_pdf), page_start=pg_start, page_end=pg_end):
             blocks = find_text_blocks(page_image)
             texts = ocr_text_blocks(page_image, blocks)
-            for text in texts:
-                print(text)
+            print(texts)
+            print("-------------------")
+            # for text in texts:
+            #     print(text)
+        print("----- Export Finished -----")
     else:
         raise Exception("Not other versions")
 
